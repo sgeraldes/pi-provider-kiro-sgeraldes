@@ -105,7 +105,7 @@ function emitToolCall(
     args = JSON.parse(state.input) as Record<string, unknown>;
   } catch (e) {
     console.warn(
-      `[pi-provider-kiro] Failed to parse tool input for "${state.name}" (toolUseId: ${state.toolUseId}): ${e instanceof Error ? e.message : String(e)}. Raw input (${state.input.length} chars): ${state.input.substring(0, 200)}`,
+      `[pi-provider-kiro-sgeraldes] Failed to parse tool input for "${state.name}" (toolUseId: ${state.toolUseId}): ${e instanceof Error ? e.message : String(e)}. Raw input (${state.input.length} chars): ${state.input.substring(0, 200)}`,
     );
     return false;
   }
@@ -275,7 +275,7 @@ export function streamKiro(
           history.push({ assistantResponseMessage: { content: "Continue" } });
         const profileArn = resolveProfileArn();
         if (retryCount === 0) {
-          console.warn(`[pi-provider-kiro] profileArn=${profileArn}, model=${kiroModelId}, endpoint=${endpoint}`);
+          console.warn(`[pi-provider-kiro-sgeraldes] profileArn=${profileArn}, model=${kiroModelId}, endpoint=${endpoint}`);
         }
         const request: KiroRequest = {
           conversationState: {
@@ -320,25 +320,25 @@ export function streamKiro(
           }
           if (response.status === 403 && retryCount < maxRetries) {
             retryCount++;
-            console.warn(`[pi-provider-kiro] 403 on attempt ${retryCount}/${maxRetries}, trying token refresh... (token prefix: ${accessToken.substring(0, 8)}..., len: ${accessToken.length}, endpoint: ${endpoint}, errBody: ${errText})`);
+            console.warn(`[pi-provider-kiro-sgeraldes] 403 on attempt ${retryCount}/${maxRetries}, trying token refresh... (token prefix: ${accessToken.substring(0, 8)}..., len: ${accessToken.length}, endpoint: ${endpoint}, errBody: ${errText})`);
             // On 403, try to get a fresh token before retrying — the current
             // one may have been rotated by kiro-cli or another session.
             const freshCreds = getKiroCliCredentials();
             if (freshCreds?.access) {
-              console.warn("[pi-provider-kiro] Got fresh token from kiro-cli");
+              console.warn("[pi-provider-kiro-sgeraldes] Got fresh token from kiro-cli");
               accessToken = freshCreds.access;
             } else {
-              console.warn("[pi-provider-kiro] No kiro-cli, trying token file refresh...");
+              console.warn("[pi-provider-kiro-sgeraldes] No kiro-cli, trying token file refresh...");
               // No kiro-cli available — try refreshing the token file directly.
               // Force refresh since a 403 means the server rejected our token.
               // Skip in test environment to avoid interfering with mocked fetch.
               if (!process.env.VITEST) {
                 const refreshedCreds = await refreshFromTokenFile(true);
                 if (refreshedCreds) {
-                  console.warn("[pi-provider-kiro] Got refreshed token from file");
+                  console.warn("[pi-provider-kiro-sgeraldes] Got refreshed token from file");
                   accessToken = refreshedCreds.access;
                 } else {
-                  console.warn("[pi-provider-kiro] Token file refresh FAILED");
+                  console.warn("[pi-provider-kiro-sgeraldes] Token file refresh FAILED");
                 }
               }
             }
@@ -565,7 +565,7 @@ export function streamKiro(
             retryCount++;
             const delayMs = exponentialBackoff(retryCount - 1, 1000, MAX_RETRY_DELAY);
             console.warn(
-              `[pi-provider-kiro] Empty response (no text, no tool calls) — retrying (${retryCount}/${maxRetries})`,
+              `[pi-provider-kiro-sgeraldes] Empty response (no text, no tool calls) — retrying (${retryCount}/${maxRetries})`,
             );
             // Reset output content for the retry
             output.content = [];
@@ -573,7 +573,7 @@ export function streamKiro(
             continue;
           }
           console.warn(
-            `[pi-provider-kiro] Empty response after ${maxRetries} retries — returning stopReason:"stop" to avoid agent loop stall`,
+            `[pi-provider-kiro-sgeraldes] Empty response after ${maxRetries} retries — returning stopReason:"stop" to avoid agent loop stall`,
           );
         }
         // Use emittedToolCalls (not toolCalls.length) to avoid stopReason:"toolUse"

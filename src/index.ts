@@ -12,21 +12,21 @@ import { streamKiro } from "./stream.js";
 import { fetchKiroUsage } from "./usage.js";
 
 export default function (pi: ExtensionAPI) {
-  pi.registerProvider("kiro", {
+  pi.registerProvider("kiro-sgeraldes", {
     baseUrl: "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
-    api: "kiro-api",
+    api: "kiro-api-sgeraldes",
     models: kiroModels,
     oauth: {
       // Name reflects all supported auth methods: AWS Builder ID, Google, GitHub
-      name: "Kiro (Builder ID / Google / GitHub)",
+      name: "Kiro (sgeraldes) (Builder ID / Google / GitHub)",
       login: loginKiro,
       refreshToken: refreshKiroToken,
       getApiKey: (cred: OAuthCredentials) => cred.access,
       getCliCredentials: getKiroCliCredentials,
       modifyModels: (models: Model<Api>[], cred: OAuthCredentials) => {
         const apiRegion = resolveApiRegion((cred as KiroCredentials).region);
-        const kiroOnly = models.filter((m: Model<Api>) => m.provider === "kiro");
-        const nonKiro = models.filter((m: Model<Api>) => m.provider !== "kiro");
+        const kiroOnly = models.filter((m: Model<Api>) => m.provider === "kiro-sgeraldes");
+        const nonKiro = models.filter((m: Model<Api>) => m.provider !== "kiro-sgeraldes");
         const modifiedKiro = filterModelsByRegion(kiroOnly, apiRegion).map((m: Model<Api>) => ({
           ...m,
           baseUrl: `https://q.${apiRegion}.amazonaws.com/generateAssistantResponse`,

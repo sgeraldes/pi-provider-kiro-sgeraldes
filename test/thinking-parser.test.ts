@@ -7,8 +7,8 @@ function makeOutput(): AssistantMessage {
   return {
     role: "assistant",
     content: [],
-    api: "kiro-api",
-    provider: "kiro",
+    api: "kiro-api-sgeraldes",
+    provider: "kiro-sgeraldes",
     model: "test",
     usage: {
       input: 0,

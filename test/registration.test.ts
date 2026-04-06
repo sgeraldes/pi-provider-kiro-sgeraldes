@@ -13,14 +13,14 @@ describe("Feature 1: Extension Registration", () => {
     expect(typeof mod.default).toBe("function");
   });
 
-  it("calls registerProvider with 'kiro'", async () => {
+  it("calls registerProvider with 'kiro-sgeraldes'", async () => {
     const mod = await import("../src/index.js");
     const { pi, registerProvider } = mockPi();
 
     mod.default(pi);
 
     expect(registerProvider).toHaveBeenCalledOnce();
-    expect(registerProvider.mock.calls[0][0]).toBe("kiro");
+    expect(registerProvider.mock.calls[0][0]).toBe("kiro-sgeraldes");
   });
 
   it("registers 4 models", async () => {
@@ -32,13 +32,13 @@ describe("Feature 1: Extension Registration", () => {
     expect(config.models).toHaveLength(17);
   });
 
-  it("registers OAuth with name 'Kiro (Builder ID / Google / GitHub)'", async () => {
+  it("registers OAuth with name 'Kiro (sgeraldes) (Builder ID / Google / GitHub)'", async () => {
     const mod = await import("../src/index.js");
     const { pi, registerProvider } = mockPi();
     mod.default(pi);
 
     const config = registerProvider.mock.calls[0][1];
-    expect(config.oauth.name).toBe("Kiro (Builder ID / Google / GitHub)");
+    expect(config.oauth.name).toBe("Kiro (sgeraldes) (Builder ID / Google / GitHub)");
     expect(typeof config.oauth.login).toBe("function");
     expect(typeof config.oauth.refreshToken).toBe("function");
     expect(typeof config.oauth.getApiKey).toBe("function");
@@ -54,12 +54,12 @@ describe("Feature 1: Extension Registration", () => {
     expect(typeof config.streamSimple).toBe("function");
   });
 
-  it("uses kiro-api as the api type", async () => {
+  it("uses kiro-api-sgeraldes as the api type", async () => {
     const mod = await import("../src/index.js");
     const { pi, registerProvider } = mockPi();
     mod.default(pi);
 
-    expect(registerProvider.mock.calls[0][1].api).toBe("kiro-api");
+    expect(registerProvider.mock.calls[0][1].api).toBe("kiro-api-sgeraldes");
   });
 
   it.each([
@@ -77,7 +77,7 @@ describe("Feature 1: Extension Registration", () => {
     mod.default(pi);
 
     const config = registerProvider.mock.calls[0][1];
-    const models = kiroModels.map((m) => ({ ...m, provider: "kiro", api: "kiro-api", baseUrl: "old" }));
+    const models = kiroModels.map((m) => ({ ...m, provider: "kiro-sgeraldes", api: "kiro-api-sgeraldes", baseUrl: "old" }));
     const creds = { access: "x", refresh: "x", expires: 0, clientId: "", clientSecret: "", region: ssoRegion };
     const modified = config.oauth.modifyModels(models, creds);
     expect(modified[0].baseUrl).toBe(`https://q.${expectedApiRegion}.amazonaws.com/generateAssistantResponse`);
@@ -89,7 +89,7 @@ describe("Feature 1: Extension Registration", () => {
     mod.default(pi);
 
     const config = registerProvider.mock.calls[0][1];
-    const models = kiroModels.map((m) => ({ ...m, provider: "kiro", api: "kiro-api", baseUrl: "old" }));
+    const models = kiroModels.map((m) => ({ ...m, provider: "kiro-sgeraldes", api: "kiro-api-sgeraldes", baseUrl: "old" }));
     const creds = { access: "x", refresh: "x", expires: 0, clientId: "", clientSecret: "", region: "eu-west-1" };
     const modified = config.oauth.modifyModels(models, creds);
     const ids = modified.map((m: { id: string }) => m.id);
@@ -104,7 +104,7 @@ describe("Feature 1: Extension Registration", () => {
     mod.default(pi);
 
     const config = registerProvider.mock.calls[0][1];
-    const kiro = kiroModels.map((m) => ({ ...m, provider: "kiro", api: "kiro-api", baseUrl: "old" }));
+    const kiro = kiroModels.map((m) => ({ ...m, provider: "kiro-sgeraldes", api: "kiro-api-sgeraldes", baseUrl: "old" }));
     const codex = [
       {
         id: "gpt-5.4",

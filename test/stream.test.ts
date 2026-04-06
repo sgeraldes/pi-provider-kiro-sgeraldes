@@ -26,8 +26,8 @@ function makeModel(overrides?: Partial<Model<Api>>): Model<Api> {
   return {
     id: "claude-sonnet-4-5",
     name: "Sonnet",
-    api: "kiro-api",
-    provider: "kiro",
+    api: "kiro-api-sgeraldes",
+    provider: "kiro-sgeraldes",
     baseUrl: "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
     reasoning: true,
     input: ["text", "image"],
@@ -401,8 +401,8 @@ describe("Feature 9: Streaming Integration", () => {
     const abortedAssistant: AssistantMessage = {
       role: "assistant",
       content: [],
-      api: "kiro-api",
-      provider: "kiro",
+      api: "kiro-api-sgeraldes",
+      provider: "kiro-sgeraldes",
       model: "claude-sonnet-4-5",
       usage: zeroUsage,
       stopReason: "aborted",
@@ -494,8 +494,8 @@ describe("Feature 9: Streaming Integration", () => {
     const emptyAssistant: AssistantMessage = {
       role: "assistant",
       content: [],
-      api: "kiro-api",
-      provider: "kiro",
+      api: "kiro-api-sgeraldes",
+      provider: "kiro-sgeraldes",
       model: "claude-sonnet-4-5",
       usage: zeroUsage,
       stopReason: "stop",
@@ -534,8 +534,8 @@ describe("Feature 9: Streaming Integration", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "I see a cat" }],
-          api: "kiro-api",
-          provider: "kiro",
+          api: "kiro-api-sgeraldes",
+          provider: "kiro-sgeraldes",
           model: "claude-sonnet-4-5",
           usage: zeroUsage,
           stopReason: "stop",
@@ -573,8 +573,8 @@ describe("Feature 9: Streaming Integration", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "Got it" }],
-          api: "kiro-api",
-          provider: "kiro",
+          api: "kiro-api-sgeraldes",
+          provider: "kiro-sgeraldes",
           model: "claude-sonnet-4-5",
           usage: zeroUsage,
           stopReason: "stop",
@@ -584,8 +584,8 @@ describe("Feature 9: Streaming Integration", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "Got that too" }],
-          api: "kiro-api",
-          provider: "kiro",
+          api: "kiro-api-sgeraldes",
+          provider: "kiro-sgeraldes",
           model: "claude-sonnet-4-5",
           usage: zeroUsage,
           stopReason: "stop",
@@ -618,8 +618,8 @@ describe("Feature 9: Streaming Integration", () => {
     const assistantWithToolCall: AssistantMessage = {
       role: "assistant",
       content: [{ type: "toolCall", id: "tc1", name: "bash", arguments: { cmd: "ls" } }],
-      api: "kiro-api",
-      provider: "kiro",
+      api: "kiro-api-sgeraldes",
+      provider: "kiro-sgeraldes",
       model: "claude-sonnet-4-5",
       usage: zeroUsage,
       stopReason: "toolUse",
@@ -654,8 +654,8 @@ describe("Feature 9: Streaming Integration", () => {
     const assistantWithTool: AssistantMessage = {
       role: "assistant",
       content: [{ type: "toolCall", id: "tc1", name: "calc", arguments: { expr: "2+2" } }],
-      api: "kiro-api",
-      provider: "kiro",
+      api: "kiro-api-sgeraldes",
+      provider: "kiro-sgeraldes",
       model: "claude-sonnet-4-5",
       usage: zeroUsage,
       stopReason: "toolUse",
@@ -1065,7 +1065,7 @@ describe("Feature 9: Streaming Integration", () => {
     // Find the parse-failure warning (there may also be a profileArn diagnostic log)
     const parseMsgs = warnSpy.mock.calls.map((c) => c[0] as string).filter((m) => m.includes("Failed to parse"));
     expect(parseMsgs).toHaveLength(1);
-    expect(parseMsgs[0]).toContain("[pi-provider-kiro]");
+    expect(parseMsgs[0]).toContain("[pi-provider-kiro-sgeraldes]");
     expect(parseMsgs[0]).toContain("bash");
     expect(parseMsgs[0]).toContain("tc1");
     expect(parseMsgs[0]).toContain("not-valid-json");
@@ -1547,8 +1547,8 @@ describe("Feature 9: Streaming Integration", () => {
     const truncatedAssistant: AssistantMessage = {
       role: "assistant",
       content: [{ type: "text", text: "partial..." }],
-      api: "kiro-api",
-      provider: "kiro",
+      api: "kiro-api-sgeraldes",
+      provider: "kiro-sgeraldes",
       model: "claude-sonnet-4-5",
       usage: zeroUsage,
       stopReason: "length",

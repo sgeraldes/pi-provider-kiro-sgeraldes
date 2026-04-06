@@ -104,7 +104,7 @@ export function filterModelsByRegion<T extends { id: string }>(models: T[], apiR
   const allowed = MODELS_BY_REGION[apiRegion];
   if (!allowed) {
     console.warn(
-      `[pi-provider-kiro] Unknown API region "${apiRegion}" — no models available. Update MODELS_BY_REGION in models.ts.`,
+      `[pi-provider-kiro-sgeraldes] Unknown API region "${apiRegion}" — no models available. Update MODELS_BY_REGION in models.ts.`,
     );
     return [];
   }
@@ -119,8 +119,8 @@ export const kiroModels = [
   {
     id: "claude-opus-4-6",
     name: "Claude Opus 4.6",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -131,8 +131,8 @@ export const kiroModels = [
   {
     id: "claude-opus-4-6-1m",
     name: "Claude Opus 4.6 (1M)",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -144,8 +144,8 @@ export const kiroModels = [
   {
     id: "claude-sonnet-4-6",
     name: "Claude Sonnet 4.6",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -156,8 +156,8 @@ export const kiroModels = [
   {
     id: "claude-sonnet-4-6-1m",
     name: "Claude Sonnet 4.6 (1M)",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -169,8 +169,8 @@ export const kiroModels = [
   {
     id: "claude-opus-4-5",
     name: "Claude Opus 4.5",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -182,8 +182,8 @@ export const kiroModels = [
   {
     id: "claude-sonnet-4-5",
     name: "Claude Sonnet 4.5",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -194,8 +194,8 @@ export const kiroModels = [
   {
     id: "claude-sonnet-4-5-1m",
     name: "Claude Sonnet 4.5 (1M)",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -207,8 +207,8 @@ export const kiroModels = [
   {
     id: "claude-sonnet-4",
     name: "Claude Sonnet 4",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],
@@ -220,8 +220,8 @@ export const kiroModels = [
   {
     id: "claude-haiku-4-5",
     name: "Claude Haiku 4.5",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: false,
     input: ["text", "image"] as ("text" | "image")[],
@@ -233,8 +233,8 @@ export const kiroModels = [
   {
     id: "deepseek-3-2",
     name: "DeepSeek 3.2",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text"] as ("text" | "image")[],
@@ -246,8 +246,8 @@ export const kiroModels = [
   {
     id: "kimi-k2-5",
     name: "Kimi K2.5",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text"] as ("text" | "image")[],
@@ -259,8 +259,8 @@ export const kiroModels = [
   {
     id: "minimax-m2-1",
     name: "MiniMax M2.1",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: false,
     input: ["text"] as ("text" | "image")[],
@@ -272,8 +272,8 @@ export const kiroModels = [
   {
     id: "glm-4-7",
     name: "GLM 4.7",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text"] as ("text" | "image")[],
@@ -284,8 +284,8 @@ export const kiroModels = [
   {
     id: "glm-4-7-flash",
     name: "GLM 4.7 Flash",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: false,
     input: ["text"] as ("text" | "image")[],
@@ -297,8 +297,8 @@ export const kiroModels = [
   {
     id: "qwen3-coder-next",
     name: "Qwen3 Coder Next",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text"] as ("text" | "image")[],
@@ -309,8 +309,8 @@ export const kiroModels = [
   {
     id: "qwen3-coder-480b",
     name: "Qwen3 Coder 480B",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text"] as ("text" | "image")[],
@@ -322,8 +322,8 @@ export const kiroModels = [
   {
     id: "agi-nova-beta-1m",
     name: "AGI Nova Beta (1M)",
-    api: "kiro-api" as const,
-    provider: "kiro" as const,
+    api: "kiro-api-sgeraldes" as const,
+    provider: "kiro-sgeraldes" as const,
     baseUrl: BASE_URL,
     reasoning: true,
     input: ["text", "image"] as ("text" | "image")[],

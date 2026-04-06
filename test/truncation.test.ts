@@ -19,8 +19,8 @@ function makeAssistant(stopReason: string): AssistantMessage {
   return {
     role: "assistant",
     content: [{ type: "text", text: "some response" }],
-    api: "kiro-api",
-    provider: "kiro",
+    api: "kiro-api-sgeraldes",
+    provider: "kiro-sgeraldes",
     model: "test",
     usage: zeroUsage,
     stopReason,

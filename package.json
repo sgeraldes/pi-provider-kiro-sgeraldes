@@ -1,12 +1,12 @@
 {
-  "name": "pi-provider-kiro",
-  "version": "0.4.5",
-  "description": "pi extension for Kiro API (AWS CodeWhisperer/Q) — 17 models across 7 families with OAuth authentication",
+  "name": "pi-provider-kiro-sgeraldes",
+  "version": "0.4.5-sgeraldes.0",
+  "description": "Personal fork of pi-provider-kiro for the Kiro API (AWS CodeWhisperer/Q)",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikeyobrien/pi-provider-kiro.git"
+    "url": "git+https://github.com/sgeraldes/pi-provider-kiro-sgeraldes.git"
   },
   "keywords": [
     "pi",
@@ -44,5 +44,10 @@
   },
   "dependencies": {
     "js-tiktoken": "^1.0.21"
-  }
+  },
+  "homepage": "https://github.com/sgeraldes/pi-provider-kiro-sgeraldes#readme",
+  "bugs": {
+    "url": "https://github.com/sgeraldes/pi-provider-kiro-sgeraldes/issues"
+  },
+  "author": "sgeraldes"
 }

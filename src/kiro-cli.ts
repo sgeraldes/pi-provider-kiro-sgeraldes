@@ -264,7 +264,7 @@ export function refreshViaKiroCli(): KiroCredentials | undefined {
     return getKiroCliCredentials();
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.warn(`[pi-provider-kiro] kiro-cli refresh failed: ${msg}`);
+    console.warn(`[pi-provider-kiro-sgeraldes] kiro-cli refresh failed: ${msg}`);
     return undefined;
   }
 }

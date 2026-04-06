@@ -1,6 +1,8 @@
-# pi-provider-kiro
+# pi-provider-kiro-sgeraldes
 
 A [pi](https://shittycodingagent.ai/) provider extension that connects pi to the **Kiro API** (AWS CodeWhisperer/Q), giving you access to 17 models through a single provider.
+
+This is the personal **sgeraldes** fork of `pi-provider-kiro`, renamed so it can coexist with the upstream provider in the same pi installation.
 
 ## Models
 
@@ -26,19 +28,19 @@ All models are free to use through Kiro.
 Install the provider:
 
 ```bash
-pi install npm:pi-provider-kiro
+pi install npm:pi-provider-kiro-sgeraldes
 ```
 
 Or install via npm directly:
 
 ```bash
-npm install -g pi-provider-kiro
+npm install -g pi-provider-kiro-sgeraldes
 ```
 
 Then log in:
 
 ```
-/login kiro
+/login kiro-sgeraldes
 ```
 
 This opens a browser for authentication. You can choose from:

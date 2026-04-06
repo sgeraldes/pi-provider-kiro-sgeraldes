@@ -25,8 +25,8 @@ const user = (content: string): UserMessage => ({ role: "user", content, timesta
 const assistant = (text: string, opts?: Partial<AssistantMessage>): AssistantMessage => ({
   role: "assistant",
   content: [{ type: "text", text }],
-  api: "kiro-api",
-  provider: "kiro",
+  api: "kiro-api-sgeraldes",
+  provider: "kiro-sgeraldes",
   model: "test",
   usage,
   stopReason: "stop",
