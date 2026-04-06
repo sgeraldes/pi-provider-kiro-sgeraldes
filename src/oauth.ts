@@ -9,6 +9,9 @@
 // flow since it already handles the complexity.
 
 import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { OAuthCredentials, OAuthLoginCallbacks } from "@mariozechner/pi-ai";
 
 export const SSO_OIDC_ENDPOINT = "https://oidc.us-east-1.amazonaws.com";
@@ -211,6 +214,168 @@ export async function loginKiroBuilderID(callbacks: OAuthLoginCallbacks): Promis
 // The actual AWS token is valid for this much longer than credentials.expires indicates.
 const EXPIRES_BUFFER_MS = 5 * 60 * 1000;
 
+// Token file paths
+const SSO_CACHE_DIR = join(homedir(), ".aws", "sso", "cache");
+const KIRO_TOKEN_PATH = join(SSO_CACHE_DIR, "kiro-auth-token.json");
+
+interface KiroTokenFileData {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  region?: string;
+  clientIdHash?: string;
+  authMethod?: string;
+  provider?: string;
+}
+
+// Mutex to prevent concurrent token file refreshes from racing.
+// When two streams hit 403 simultaneously, only one should refresh;
+// the other waits and reuses the result.
+let tokenFileRefreshPromise: Promise<KiroCredentials | undefined> | null = null;
+let lastTokenFileResult: KiroCredentials | undefined;
+let lastTokenFileRefreshTime = 0;
+
+/**
+ * Refresh credentials by reading the kiro-auth-token.json file and performing
+ * an OIDC or social refresh. Writes the refreshed token back to the file.
+ *
+ * Has a built-in mutex so concurrent callers (e.g. multiple streams hitting 403)
+ * share a single refresh instead of racing.
+ *
+ * @param forceRefresh - If true, always perform a network refresh even if the
+ *   token file appears valid. Use on 403 where the server rejected the token.
+ */
+export async function refreshFromTokenFile(forceRefresh = false): Promise<KiroCredentials | undefined> {
+  if (tokenFileRefreshPromise) {
+    return tokenFileRefreshPromise;
+  }
+  if (lastTokenFileResult && Date.now() - lastTokenFileRefreshTime < 5000) {
+    return lastTokenFileResult;
+  }
+  tokenFileRefreshPromise = doRefreshFromTokenFile(forceRefresh);
+  try {
+    const result = await tokenFileRefreshPromise;
+    if (result) {
+      lastTokenFileResult = result;
+      lastTokenFileRefreshTime = Date.now();
+    }
+    return result;
+  } finally {
+    tokenFileRefreshPromise = null;
+  }
+}
+
+async function doRefreshFromTokenFile(forceRefresh: boolean): Promise<KiroCredentials | undefined> {
+  try {
+    if (!existsSync(KIRO_TOKEN_PATH)) return undefined;
+    const tokenData = JSON.parse(readFileSync(KIRO_TOKEN_PATH, "utf-8")) as KiroTokenFileData;
+    if (!tokenData.refreshToken) return undefined;
+
+    const region = tokenData.region ?? "us-east-1";
+    const expiresAt = new Date(tokenData.expiresAt).getTime();
+
+    // If the token is still valid and not force-refreshing, return it directly
+    if (!forceRefresh && Date.now() < expiresAt - 2 * 60 * 1000) {
+      // Build credentials from the still-valid token file
+      let clientId = "";
+      let clientSecret = "";
+      if (tokenData.clientIdHash) {
+        const regPath = join(SSO_CACHE_DIR, `${tokenData.clientIdHash}.json`);
+        if (existsSync(regPath)) {
+          try {
+            const reg = JSON.parse(readFileSync(regPath, "utf-8"));
+            clientId = reg.clientId ?? "";
+            clientSecret = reg.clientSecret ?? "";
+          } catch {}
+        }
+      }
+      const authMethod: KiroAuthMethod = tokenData.authMethod === "IdC" ? "idc" : "desktop";
+      return {
+        refresh: `${tokenData.refreshToken}|${clientId}|${clientSecret}|${authMethod}`,
+        access: tokenData.accessToken,
+        expires: expiresAt - 2 * 60 * 1000,
+        clientId,
+        clientSecret,
+        region,
+        authMethod,
+      };
+    }
+
+    // Token expired or force refresh — perform OIDC/social refresh
+    if (tokenData.authMethod === "IdC" && tokenData.clientIdHash) {
+      const regPath = join(SSO_CACHE_DIR, `${tokenData.clientIdHash}.json`);
+      if (!existsSync(regPath)) return undefined;
+      const reg = JSON.parse(readFileSync(regPath, "utf-8"));
+      if (!reg.clientId || !reg.clientSecret) return undefined;
+
+      const response = await fetch(`https://oidc.${region}.amazonaws.com/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "User-Agent": "pi-provider-kiro" },
+        body: JSON.stringify({
+          clientId: reg.clientId,
+          clientSecret: reg.clientSecret,
+          refreshToken: tokenData.refreshToken,
+          grantType: "refresh_token",
+        }),
+      });
+      if (!response.ok) return undefined;
+      const data = (await response.json()) as { accessToken: string; refreshToken?: string; expiresIn: number };
+      if (!data.accessToken) return undefined;
+
+      const newExpiry = new Date(Date.now() + data.expiresIn * 1000);
+      const updated = {
+        ...tokenData,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken || tokenData.refreshToken,
+        expiresAt: newExpiry.toISOString(),
+      };
+      writeFileSync(KIRO_TOKEN_PATH, JSON.stringify(updated, null, 4), "utf-8");
+
+      return {
+        refresh: `${updated.refreshToken}|${reg.clientId}|${reg.clientSecret}|idc`,
+        access: data.accessToken,
+        expires: newExpiry.getTime() - 2 * 60 * 1000,
+        clientId: reg.clientId,
+        clientSecret: reg.clientSecret,
+        region,
+        authMethod: "idc",
+      };
+    } else if (tokenData.authMethod !== "IdC") {
+      const response = await fetch(`https://prod.${region}.auth.desktop.kiro.dev/refreshToken`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "User-Agent": "pi-provider-kiro" },
+        body: JSON.stringify({ refreshToken: tokenData.refreshToken }),
+      });
+      if (!response.ok) return undefined;
+      const data = (await response.json()) as { accessToken: string; refreshToken?: string; expiresIn: number };
+      if (!data.accessToken) return undefined;
+
+      const newExpiry = new Date(Date.now() + data.expiresIn * 1000);
+      const updated = {
+        ...tokenData,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken || tokenData.refreshToken,
+        expiresAt: newExpiry.toISOString(),
+      };
+      writeFileSync(KIRO_TOKEN_PATH, JSON.stringify(updated, null, 4), "utf-8");
+
+      return {
+        refresh: `${updated.refreshToken}|desktop`,
+        access: data.accessToken,
+        expires: newExpiry.getTime() - 2 * 60 * 1000,
+        clientId: "",
+        clientSecret: "",
+        region,
+        authMethod: "desktop",
+      };
+    }
+
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function refreshKiroToken(credentials: OAuthCredentials): Promise<OAuthCredentials> {
   const { getKiroCliCredentials, getKiroCliCredentialsAllowExpired, saveKiroCliCredentials, getKiroCliSocialToken } =
     await import("./kiro-cli.js");
@@ -258,6 +423,21 @@ export async function refreshKiroToken(credentials: OAuthCredentials): Promise<O
     const actualExpiry = credentials.expires + EXPIRES_BUFFER_MS;
     if (credentials.access && Date.now() < actualExpiry) {
       return { ...credentials, expires: actualExpiry };
+    }
+
+    // Layer 6: Token file fallback — read kiro-auth-token.json which may have
+    // been refreshed by the Kiro IDE, claude2kiro, or another process.
+    // Only attempt if kiro-cli is unavailable (avoids double-refresh on kiro-cli systems)
+    // and only use if the file yields a different access token than what we already have.
+    if (!getKiroCliCredentialsAllowExpired() && !process.env.VITEST) {
+      try {
+        const tokenFileCreds = await refreshFromTokenFile();
+        if (tokenFileCreds && tokenFileCreds.access !== credentials.access) {
+          return tokenFileCreds;
+        }
+      } catch {
+        // Token file refresh also failed
+      }
     }
 
     throw refreshError;

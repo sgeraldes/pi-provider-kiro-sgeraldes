@@ -19,7 +19,7 @@ import { parseKiroEvents } from "./event-parser.js";
 import { addPlaceholderTools, HISTORY_LIMIT, truncateHistory } from "./history.js";
 import { getKiroCliCredentials } from "./kiro-cli.js";
 import { resolveKiroModel } from "./models.js";
-import type { KiroCredentials } from "./oauth.js";
+import { refreshFromTokenFile, type KiroCredentials } from "./oauth.js";
 import { exponentialBackoff, isNonRetryableBodyError, isTooBigError, MAX_RETRY_DELAY, retryConfig } from "./retry.js";
 import { ThinkingTagParser } from "./thinking-parser.js";
 import { countTokens } from "./tokenizer.js";
@@ -81,6 +81,7 @@ function resolveProfileArn(): string {
   const cliCreds = getKiroCliCredentials() as KiroCredentials | undefined;
   return cliCreds?.profileArn || KIRO_CONSUMER_PROFILE_ARN;
 }
+
 interface KiroToolCallState {
   toolUseId: string;
   name: string;
@@ -316,10 +317,28 @@ export function streamKiro(
           }
           if (response.status === 403 && retryCount < maxRetries) {
             retryCount++;
+            console.warn(`[pi-provider-kiro] 403 on attempt ${retryCount}/${maxRetries}, trying token refresh...`);
             // On 403, try to get a fresh token before retrying — the current
             // one may have been rotated by kiro-cli or another session.
             const freshCreds = getKiroCliCredentials();
-            if (freshCreds?.access) accessToken = freshCreds.access;
+            if (freshCreds?.access) {
+              console.warn("[pi-provider-kiro] Got fresh token from kiro-cli");
+              accessToken = freshCreds.access;
+            } else {
+              console.warn("[pi-provider-kiro] No kiro-cli, trying token file refresh...");
+              // No kiro-cli available — try refreshing the token file directly.
+              // Force refresh since a 403 means the server rejected our token.
+              // Skip in test environment to avoid interfering with mocked fetch.
+              if (!process.env.VITEST) {
+                const refreshedCreds = await refreshFromTokenFile(true);
+                if (refreshedCreds) {
+                  console.warn("[pi-provider-kiro] Got refreshed token from file");
+                  accessToken = refreshedCreds.access;
+                } else {
+                  console.warn("[pi-provider-kiro] Token file refresh FAILED");
+                }
+              }
+            }
             const delayMs = exponentialBackoff(retryCount - 1, 500, MAX_RETRY_DELAY);
             await abortableDelay(delayMs, options?.signal);
             continue;
