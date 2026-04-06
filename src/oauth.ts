@@ -49,14 +49,22 @@ export async function loginKiro(
 ): Promise<OAuthCredentials> {
   const { getKiroCliCredentials, getKiroCliCredentialsAllowExpired, saveKiroCliCredentials, getKiroCliSocialToken } =
     await import("./kiro-cli.js");
+  const { getKiroIdeCredentials, getKiroIdeCredentialsAllowExpired } = await import("./kiro-ide.js");
 
   // If user explicitly wants social login, delegate to kiro-cli
   if (preferredMethod === "google" || preferredMethod === "github") {
     return loginViaKiroCli(callbacks, preferredMethod);
   }
 
-  // For "auto" or "builder-id", check for existing kiro-cli credentials
-  // Prefer social token if available (user explicitly logged in that way)
+  // For "auto" or "builder-id", first check the Kiro IDE token cache.
+  // This is especially important on Windows where kiro-cli is unavailable.
+  const ideCreds = getKiroIdeCredentials();
+  if (ideCreds && (preferredMethod === "auto" || ideCreds.authMethod === "idc")) {
+    (callbacks as unknown as { onProgress?: (msg: string) => void }).onProgress?.("Using existing Kiro IDE credentials");
+    return ideCreds;
+  }
+
+  // Then check for existing kiro-cli credentials, preferring explicit social login.
   let cliCreds = getKiroCliSocialToken();
   if (!cliCreds) {
     cliCreds = getKiroCliCredentials();
@@ -71,7 +79,19 @@ export async function loginKiro(
     return cliCreds;
   }
 
-  // Credentials expired but refresh token may still be valid — try refreshing
+  // Credentials expired but refresh token may still be valid — try IDE first, then kiro-cli.
+  const expiredIdeCreds = getKiroIdeCredentialsAllowExpired();
+  if (expiredIdeCreds && (preferredMethod === "auto" || expiredIdeCreds.authMethod === "idc")) {
+    try {
+      (callbacks as unknown as { onProgress?: (msg: string) => void }).onProgress?.(
+        "Refreshing expired Kiro IDE credentials...",
+      );
+      return await refreshKiroTokenDirect(expiredIdeCreds);
+    } catch {
+      // Refresh failed, fall through to kiro-cli and then device code flow
+    }
+  }
+
   const expiredCreds = getKiroCliCredentialsAllowExpired();
   if (expiredCreds) {
     try {
@@ -379,10 +399,14 @@ async function doRefreshFromTokenFile(forceRefresh: boolean): Promise<KiroCreden
 export async function refreshKiroToken(credentials: OAuthCredentials): Promise<OAuthCredentials> {
   const { getKiroCliCredentials, getKiroCliCredentialsAllowExpired, saveKiroCliCredentials, getKiroCliSocialToken } =
     await import("./kiro-cli.js");
+  const { getKiroIdeCredentials, getKiroIdeCredentialsAllowExpired } = await import("./kiro-ide.js");
 
-  // Layer 1: Pre-refresh check — prefer social token if available (user logged in that way)
+  // Layer 1: Pre-refresh check — prefer valid IDE token first, then social token if available.
   // Otherwise check for any valid kiro-cli token
-  let preCheckCreds = getKiroCliSocialToken();
+  let preCheckCreds = getKiroIdeCredentials();
+  if (!preCheckCreds) {
+    preCheckCreds = getKiroCliSocialToken();
+  }
   if (!preCheckCreds) {
     preCheckCreds = getKiroCliCredentials();
   }
@@ -405,7 +429,18 @@ export async function refreshKiroToken(credentials: OAuthCredentials): Promise<O
       return retryCreds;
     }
 
-    // Layer 4: kiro-cli may have a newer refresh token (expired access token).
+    // Layer 4: Kiro IDE may have a newer refresh token (expired access token).
+    // Try refreshing with those credentials before kiro-cli.
+    const expiredIdeCreds = getKiroIdeCredentialsAllowExpired();
+    if (expiredIdeCreds && expiredIdeCreds.refresh !== credentials.refresh) {
+      try {
+        return await refreshKiroTokenDirect(expiredIdeCreds);
+      } catch {
+        // Also failed, continue to kiro-cli fallback
+      }
+    }
+
+    // Layer 5: kiro-cli may have a newer refresh token (expired access token).
     // Try refreshing with those credentials instead of the stale ones from auth.json.
     const expiredCliCreds = getKiroCliCredentialsAllowExpired();
     if (expiredCliCreds && expiredCliCreds.refresh !== credentials.refresh) {
@@ -418,14 +453,14 @@ export async function refreshKiroToken(credentials: OAuthCredentials): Promise<O
       }
     }
 
-    // Layer 5: Graceful degradation — our expires has a 5-min buffer, so the
+    // Layer 6: Graceful degradation — our expires has a 5-min buffer, so the
     // actual AWS token may still be valid. Return it to buy time.
     const actualExpiry = credentials.expires + EXPIRES_BUFFER_MS;
     if (credentials.access && Date.now() < actualExpiry) {
       return { ...credentials, expires: actualExpiry };
     }
 
-    // Layer 6: Token file fallback — read kiro-auth-token.json which may have
+    // Layer 7: Token file fallback — read kiro-auth-token.json which may have
     // been refreshed by the Kiro IDE, claude2kiro, or another process.
     // Only attempt if kiro-cli is unavailable (avoids double-refresh on kiro-cli systems)
     // and only use if the file yields a different access token than what we already have.

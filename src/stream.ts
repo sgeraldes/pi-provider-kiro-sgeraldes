@@ -16,7 +16,7 @@ import type {
 import { calculateCost, createAssistantMessageEventStream } from "@mariozechner/pi-ai";
 import { parseBracketToolCalls } from "./bracket-tool-parser.js";
 import { parseKiroEvents } from "./event-parser.js";
-import { addPlaceholderTools, HISTORY_LIMIT, truncateHistory } from "./history.js";
+import { addPlaceholderTools, getHistoryLimitForContextWindow, truncateHistory } from "./history.js";
 import { getKiroCliCredentials } from "./kiro-cli.js";
 import { resolveKiroModel } from "./models.js";
 import { refreshFromTokenFile, type KiroCredentials } from "./oauth.js";
@@ -173,7 +173,7 @@ export function streamKiro(
           systemPrepended,
           currentMsgStartIdx,
         } = buildHistory(normalized, kiroModelId, effectiveSystemPrompt);
-        const history = truncateHistory(rawHistory, HISTORY_LIMIT);
+        const history = truncateHistory(rawHistory, getHistoryLimitForContextWindow(model.contextWindow));
         const toolResultLimit = TOOL_RESULT_LIMIT;
         const currentMessages = normalized.slice(currentMsgStartIdx);
         const firstMsg = currentMessages[0];

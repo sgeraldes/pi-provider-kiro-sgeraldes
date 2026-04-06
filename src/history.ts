@@ -4,6 +4,11 @@ import type { KiroHistoryEntry, KiroToolSpec } from "./transform.js";
 
 export const HISTORY_LIMIT = 850000;
 
+export function getHistoryLimitForContextWindow(contextWindow: number | undefined): number {
+  const window = contextWindow && contextWindow > 0 ? contextWindow : 200000;
+  return Math.max(HISTORY_LIMIT, Math.floor((window / 200000) * HISTORY_LIMIT));
+}
+
 /** Remove images from history entries — they've already been processed by the
  *  model in previous turns and re-sending them wastes context / causes 413s. */
 export function stripHistoryImages(history: KiroHistoryEntry[]): KiroHistoryEntry[] {

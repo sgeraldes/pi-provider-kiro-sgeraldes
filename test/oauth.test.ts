@@ -12,6 +12,11 @@ vi.mock("../src/kiro-cli.js", () => ({
   saveKiroCliCredentials: vi.fn(),
 }));
 
+vi.mock("../src/kiro-ide.js", () => ({
+  getKiroIdeCredentials: vi.fn(() => undefined),
+  getKiroIdeCredentialsAllowExpired: vi.fn(() => undefined),
+}));
+
 function makeCallbacks(overrides?: Partial<OAuthLoginCallbacks>): OAuthLoginCallbacks & {
   onAuth: ReturnType<typeof vi.fn>;
   signal: AbortSignal;

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addPlaceholderTools,
   extractToolNamesFromHistory,
+  getHistoryLimitForContextWindow,
   HISTORY_LIMIT,
   injectSyntheticToolCalls,
   sanitizeHistory,
@@ -130,6 +131,16 @@ describe("Feature 6: History Management", () => {
       expect(
         r.find((e) => e.assistantResponseMessage?.toolUses?.some((t: KiroToolUse) => t.name === "unknown_tool")),
       ).toBeUndefined();
+    });
+  });
+
+  describe("getHistoryLimitForContextWindow", () => {
+    it("keeps the base limit for 200K models", () => {
+      expect(getHistoryLimitForContextWindow(200000)).toBe(HISTORY_LIMIT);
+    });
+
+    it("scales up for 1M models", () => {
+      expect(getHistoryLimitForContextWindow(1000000)).toBe(4250000);
     });
   });
 
