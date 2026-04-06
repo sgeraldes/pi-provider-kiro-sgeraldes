@@ -249,7 +249,7 @@ export async function refreshFromTokenFile(forceRefresh = false): Promise<KiroCr
   if (tokenFileRefreshPromise) {
     return tokenFileRefreshPromise;
   }
-  if (lastTokenFileResult && Date.now() - lastTokenFileRefreshTime < 5000) {
+  if (!forceRefresh && lastTokenFileResult && Date.now() - lastTokenFileRefreshTime < 5000) {
     return lastTokenFileResult;
   }
   tokenFileRefreshPromise = doRefreshFromTokenFile(forceRefresh);

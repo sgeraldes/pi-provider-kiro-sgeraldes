@@ -1062,12 +1062,13 @@ describe("Feature 9: Streaming Integration", () => {
     const stream = streamKiro(makeModel({ reasoning: false }), makeContext(), { apiKey: "tok" });
     const events = await collect(stream);
 
-    expect(warnSpy).toHaveBeenCalledOnce();
-    const msg = warnSpy.mock.calls[0][0] as string;
-    expect(msg).toContain("[pi-provider-kiro]");
-    expect(msg).toContain("bash");
-    expect(msg).toContain("tc1");
-    expect(msg).toContain("not-valid-json");
+    // Find the parse-failure warning (there may also be a profileArn diagnostic log)
+    const parseMsgs = warnSpy.mock.calls.map((c) => c[0] as string).filter((m) => m.includes("Failed to parse"));
+    expect(parseMsgs).toHaveLength(1);
+    expect(parseMsgs[0]).toContain("[pi-provider-kiro]");
+    expect(parseMsgs[0]).toContain("bash");
+    expect(parseMsgs[0]).toContain("tc1");
+    expect(parseMsgs[0]).toContain("not-valid-json");
 
     // Tool call with unparseable JSON should be skipped entirely
     const tcEnd = events.find((e) => e.type === "toolcall_end");

@@ -274,6 +274,9 @@ export function streamKiro(
         if (history.length > 0 && history[history.length - 1].userInputMessage)
           history.push({ assistantResponseMessage: { content: "Continue" } });
         const profileArn = resolveProfileArn();
+        if (retryCount === 0) {
+          console.warn(`[pi-provider-kiro] profileArn=${profileArn}, model=${kiroModelId}, endpoint=${endpoint}`);
+        }
         const request: KiroRequest = {
           conversationState: {
             chatTriggerType: "MANUAL",
@@ -317,7 +320,7 @@ export function streamKiro(
           }
           if (response.status === 403 && retryCount < maxRetries) {
             retryCount++;
-            console.warn(`[pi-provider-kiro] 403 on attempt ${retryCount}/${maxRetries}, trying token refresh...`);
+            console.warn(`[pi-provider-kiro] 403 on attempt ${retryCount}/${maxRetries}, trying token refresh... (token prefix: ${accessToken.substring(0, 8)}..., len: ${accessToken.length}, endpoint: ${endpoint}, errBody: ${errText})`);
             // On 403, try to get a fresh token before retrying — the current
             // one may have been rotated by kiro-cli or another session.
             const freshCreds = getKiroCliCredentials();
