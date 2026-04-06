@@ -1,6 +1,6 @@
 # pi-provider-kiro-sgeraldes
 
-A [pi](https://shittycodingagent.ai/) provider extension that connects pi to the **Kiro API** (AWS CodeWhisperer/Q), giving you access to 17 models through a single provider.
+A [pi](https://shittycodingagent.ai/) provider extension that connects pi to the **Kiro API** (AWS CodeWhisperer/Q), giving you access to 18 models through a single provider.
 
 This is the personal **sgeraldes** fork of `pi-provider-kiro`, renamed so it can coexist with the upstream provider in the same pi installation.
 
@@ -18,7 +18,7 @@ Repo: <https://github.com/sgeraldes/pi-provider-kiro-sgeraldes>
 | Claude Haiku 4.5 | haiku-4-5 | 200K | ✗ |
 | DeepSeek 3.2 | deepseek-3-2 | 128K | ✓ |
 | Kimi K2.5 | kimi-k2-5 | 200K | ✓ |
-| MiniMax M2.1 | minimax-m2-1 | 128K | ✗ |
+| MiniMax M2.x | minimax-m2-5, minimax-m2-1 | 200K | ✗ |
 | GLM 4.7 | glm-4-7, glm-4-7-flash | 128K | ✓ / ✗ |
 | Qwen3 Coder | qwen3-coder-next, qwen3-coder-480b | 128K | ✓ |
 | AGI Nova | agi-nova-beta-1m | 1M | ✓ |
@@ -102,7 +102,7 @@ The extension is organized as one feature per file:
 ```
 src/
 ├── index.ts            # Extension registration
-├── models.ts           # 17 model definitions + ID resolution
+├── models.ts           # 18 model definitions + ID resolution
 ├── oauth.ts            # Multi-provider auth (Builder ID / Google / GitHub)
 ├── kiro-cli.ts         # kiro-cli credential sharing
 ├── transform.ts        # Message format conversion

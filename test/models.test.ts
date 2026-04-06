@@ -18,6 +18,7 @@ describe("Feature 2: Model Definitions", () => {
       ["deepseek-3-2", "deepseek-3.2"],
       ["kimi-k2-5", "kimi-k2.5"],
       ["minimax-m2-1", "minimax-m2.1"],
+      ["minimax-m2-5", "minimax-m2.5"],
       ["glm-4-7", "glm-4.7"],
       ["glm-4-7-flash", "glm-4.7-flash"],
       ["qwen3-coder-next", "qwen3-coder-next"],
@@ -33,8 +34,8 @@ describe("Feature 2: Model Definitions", () => {
   });
 
   describe("KIRO_MODEL_IDS", () => {
-    it("contains 17 model IDs", () => {
-      expect(KIRO_MODEL_IDS.size).toBe(17);
+    it("contains 18 model IDs", () => {
+      expect(KIRO_MODEL_IDS.size).toBe(18);
     });
   });
 
@@ -65,6 +66,7 @@ describe("Feature 2: Model Definitions", () => {
       const ids = filterModelsByRegion(kiroModels, "eu-central-1").map((m) => m.id);
       expect(ids).toContain("claude-sonnet-4-6");
       expect(ids).toContain("minimax-m2-1");
+      expect(ids).toContain("minimax-m2-5");
       expect(ids).not.toContain("deepseek-3-2");
       expect(ids).not.toContain("agi-nova-beta-1m");
     });
@@ -75,8 +77,8 @@ describe("Feature 2: Model Definitions", () => {
   });
 
   describe("model catalog", () => {
-    it("defines 17 models", () => {
-      expect(kiroModels).toHaveLength(17);
+    it("defines 18 models", () => {
+      expect(kiroModels).toHaveLength(18);
     });
 
     it("claude-haiku-4-5 has reasoning=false", () => {
