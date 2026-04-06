@@ -4,6 +4,8 @@ A [pi](https://shittycodingagent.ai/) provider extension that connects pi to the
 
 This is the personal **sgeraldes** fork of `pi-provider-kiro`, renamed so it can coexist with the upstream provider in the same pi installation.
 
+Repo: <https://github.com/sgeraldes/pi-provider-kiro-sgeraldes>
+
 ## Models
 
 | Family | Models | Context | Reasoning |
@@ -25,19 +27,27 @@ All models are free to use through Kiro.
 
 ## Setup
 
-Install the provider:
+### Install this fork
+
+Install this fork from npm:
 
 ```bash
 pi install npm:pi-provider-kiro-sgeraldes
 ```
 
-Or install via npm directly:
+Or install it globally with npm:
 
 ```bash
 npm install -g pi-provider-kiro-sgeraldes
 ```
 
-Then log in:
+You can also install directly from GitHub if needed:
+
+```bash
+pi install github:sgeraldes/pi-provider-kiro-sgeraldes
+```
+
+Then log in with this fork's provider ID:
 
 ```
 /login kiro-sgeraldes
@@ -52,9 +62,15 @@ If you have [kiro-cli](https://kiro.dev) installed and already logged in, creden
 
 ## Usage
 
-Once logged in, select any Kiro model in pi:
+Once logged in, use this fork's provider ID:
 
+```text
+/login kiro-sgeraldes
 ```
+
+Then select any Kiro model in pi:
+
+```text
 /model claude-sonnet-4-6
 ```
 
